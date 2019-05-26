@@ -38,7 +38,9 @@ CONFIG_REPOS=$(encode_config arch repos)
 
 mapfile -t envs < <(ruby -e 'ENV.each {|key,_| if not ["PATH","USER","HOME","GOROOT"].include?(key) then puts "-e #{key}" end}')
 
-docker run --rm -v "$(pwd):/build" \
+docker run --rm \
+    -v "$(pwd):/build" \
+    -v "$(pwd)/.arch-cache:/var/cache/pacman/pkg" \
     -e "CC=$CC" \
     -e "CXX=$CXX" \
     -e CONFIG_BUILD_SCRIPTS="$CONFIG_BUILD_SCRIPTS" \
