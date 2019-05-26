@@ -41,7 +41,7 @@ RUN \
 
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/core_perl
 
-# install cower and pacaur
+# install yay
 RUN \
     cd /home/$UGNAME && \
     curl -O -s https://aur.archlinux.org/cgit/aur.git/snapshot/yay-bin.tar.gz && \
