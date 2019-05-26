@@ -13,6 +13,8 @@ RUN \
 
 # copy sudoers file
 COPY contrib/etc/sudoers.d/$UGNAME /etc/sudoers.d/$UGNAME
+# Add makepkg.conf
+COPY contrib/etc/makepkg.conf /etc/makepkg.conf
 # Add pacman.conf template
 COPY contrib/etc/pacman.conf /etc/pacman.conf
 
@@ -24,6 +26,7 @@ RUN \
         base-devel \
         git \
         reflector \
+	ccache \
         --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
