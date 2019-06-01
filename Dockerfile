@@ -13,8 +13,6 @@ RUN \
 
 # copy sudoers file
 COPY contrib/etc/sudoers.d/$UGNAME /etc/sudoers.d/$UGNAME
-# Add makepkg.conf
-COPY contrib/etc/makepkg.conf /etc/makepkg.conf
 # Add pacman.conf template
 COPY contrib/etc/pacman.conf /etc/pacman.conf
 
@@ -51,6 +49,13 @@ RUN \
     tar xf yay-bin.tar.gz && \
     cd yay-bin && makepkg -is --skippgpcheck --noconfirm && cd .. && \
     rm -rf yay-bin && rm yay-bin.tar.gz
+
+# Add makepkg.conf after `pacnew` rename to prevent overwrite
+COPY contrib/etc/makepkg.conf /etc/makepkg.conf
+# Override 'package-cleanup.hook', to allow caching dependencies (yay and pacman)
+RUN \
+    sudo mkdir /etc/pacman.d/hooks/ && \
+    sudo ln -s /dev/null /etc/pacman.d/hooks/package-cleanup.hook
 
 # Add arch-travis script
 COPY init.sh /usr/bin/arch-travis
