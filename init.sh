@@ -68,6 +68,11 @@ upgrade_system() {
   sudo pacman -Syu --noconfirm
 }
 
+# clean package cache, leave only latest versions
+clean_pkg_cache() {
+  paccache -r -k1
+}
+
 # install packages defined in .travis.yml
 install_packages() {
   for package in "${CONFIG_PACKAGES[@]}"; do
@@ -123,3 +128,4 @@ echo ""
 
 arch_msg "Running travis build"
 build_scripts
+clean_pkg_cache

@@ -25,6 +25,7 @@ RUN \
         git \
         reflector \
 	ccache \
+        pacman-contrib \
         --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
