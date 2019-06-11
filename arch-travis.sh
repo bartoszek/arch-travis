@@ -41,7 +41,7 @@ mapfile -t envs < <(ruby -e 'ENV.each {|key,_| if not ["PATH","USER","HOME","GOR
 docker run --rm \
     -v "$(pwd):/build" \
     -v "$(pwd)/.arch-cache:/var/cache/pacman/pkg" \
-    -v "$(pwd)/.ccache:/home/travis/.ccache" \
+    -v "$HOME/.ccache:$HOME/.ccache" \
     -e "CC=$CC" \
     -e "CXX=$CXX" \
     -e CONFIG_BUILD_SCRIPTS="$CONFIG_BUILD_SCRIPTS" \
