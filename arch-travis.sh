@@ -38,9 +38,18 @@ CONFIG_REPOS=$(encode_config arch repos)
 
 mapfile -t envs < <(ruby -e 'ENV.each {|key,_| if not ["PATH","USER","HOME","GOROOT"].include?(key) then puts "-e #{key}" end}')
 
+# configure arch cashe
+{
+  cache=("$(travis_yml arch cache)")
+  echo "${cache[*]}" >&2
+  [[ " ${cache[@]} " =~ " ccache " ]] && cacher add ~/.ccache
+  [[ " ${cache[@]} " =~ " pacman-cache " ]] && cacher add ~/.pacman-cache
+}
+
+
 docker run --rm \
     -v "$(pwd):/build" \
-    -v "$(pwd)/.arch-cache:/var/cache/pacman/pkg" \
+    -v "$HOME/.pacman-cache:/var/cache/pacman/pkg" \
     -v "$HOME/.ccache:$HOME/.ccache" \
     -e "CC=$CC" \
     -e "CXX=$CXX" \
