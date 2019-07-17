@@ -56,4 +56,4 @@ docker run --rm \
     -e CONFIG_PACKAGES="$CONFIG_PACKAGES" \
     -e CONFIG_REPOS="$CONFIG_REPOS" \
     ${envs[@]} \
-    mikkeloscar/arch-travis:latest
+    bartoszek/arch-travis-bartus:base64
