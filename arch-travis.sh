@@ -16,7 +16,7 @@
 
 # read value from .travis.yml
 travis_yml() {
-  ruby -ryaml -e 'puts ARGV[1..-1].inject(YAML.load(File.read(ARGV[0]))) {|acc, key| acc[key] }' .travis.yml "$@"
+  ruby -ryaml -e 'ARGV[1..-1].inject(YAML.load(File.read(ARGV[0]))) {|acc, key| acc[key] }.map { |s| p s }' .travis.yml "$@"
 }
 
 # encode config so it can be passed to docker in an environment var.
