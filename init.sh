@@ -87,7 +87,7 @@ upgrade_system() {
 install_packages() {
   if [ ${#CONFIG_PACKAGES[@]} -gt 0 ]; then
     for pkg in "${CONFIG_PACKAGES[@]}"; do
-      yay -S "$pkg" --noconfirm --needed --useask || exit $?
+      yay -S "$pkg" --noconfirm --needed --useask --mflags="$(IFS=$'\n'; printf '%q ' $(env -u PWD -u PATH -u LD_LIBRARY_PATH))" || exit $?
     done
   fi
 }

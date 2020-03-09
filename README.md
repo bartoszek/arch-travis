@@ -36,7 +36,8 @@ script:
 `arch.repos` defines a list of custom repositories.
 
 `arch.packages` defines a list of packages (from official repos or AUR) to be
-installed before running the build.
+installed before running the build
+_Environment variables are available inside PKGBUILD here._
 
 `arch.mount` defines a list of shared folders (docker volumes) from travis host to build container.
 Format: `host_src:container_dst` (relative path and environment variables are supported)
