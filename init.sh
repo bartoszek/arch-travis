@@ -66,7 +66,9 @@ read_config() {
 # add custom repositories to pacman.conf
 add_repositories() {
   if [ ${#CONFIG_REPOS[@]} -gt 0 ]; then
+    fold_start "Add Repositories"
     for r in "${CONFIG_REPOS[@]}"; do
+      arch_msg "repository: $r"
       IFS=" " read -r -a splitarr <<< "${r//=/ }"
       ((repo_line+=1))
       sudo sed -i "${repo_line}i[${splitarr[0]}]" /etc/pacman.conf
@@ -74,50 +76,50 @@ add_repositories() {
       sudo sed -i "${repo_line}iServer = ${splitarr[1]}\n" /etc/pacman.conf
       ((repo_line+=1))
     done
+    fold_start "Add Repositories"
 
     # update repos
-    fold_start "Update repositories"
+    fold_start "Update Repositories"
     sudo pacman -Syy
-    fold_stop  "Update repositories"
+    fold_stop  "Update Repositories"
   fi
 }
 
 # run before_install script defined in .travis.yml
 before_install() {
   if [ ${#CONFIG_BEFORE_INSTALL[@]} -gt 0 ]; then
-    fold_start "arch_travis:before_install"
+    fold_start "Run before_install"
     for script in "${CONFIG_BEFORE_INSTALL[@]}"; do
       arch_msg "Evaluate:\n$(sed 's/^/$ /g'<<<"$script")"
       eval "$script" || exit $?
     done
-    fold_stop  "arch_travis:before_install"
+    fold_stop  "Run before_install"
   fi
 }
 
 # update reflector to prevent dead mirror causing build to fail.
 update_reflector() {
-  fold_start "arch_travis:update_reflector"
+  fold_start "Update Reflector"
   sudo reflector --verbose -l 10 --sort rate --save /etc/pacman.d/mirrorlist
-  fold_stop  "arch_travis:update_reflector"
+  fold_stop  "Update Reflector"
 }
 
 # upgrade system to avoid partial upgrade states
 upgrade_system() {
-  fold_start "arch_travis:upgrade_system"
+  fold_start "Upgrade System"
   sudo pacman -Syu --noconfirm
-  fold_stop  "arch_travis:upgrade_system"
+  fold_stop  "Upgrade System"
 }
 
 # install packages defined in .travis.yml
 install_packages() {
   if [ ${#CONFIG_PACKAGES[@]} -gt 0 ]; then
-    fold_start "arch_travis:install packages"
+    arch_msg "Install Packages"
     for pkg in "${CONFIG_PACKAGES[@]}"; do
-      time_start "yay: install $pkg"
+      time_start "Install $pkg"
       yay -S "$pkg" --noconfirm --needed --useask --gpgflags "--keyserver hkp://pool.sks-keyservers.net" --mflags="$(env|grep ^TRAVIS)" || exit $?
-      time_stop "yay: install $pkg"
+      time_stop "Install $pkg"
     done
-    fold_stop "arch_travis:install packages"
   fi
 }
 
@@ -136,15 +138,14 @@ build_scripts() {
 
 install_c_compiler() {
   if [ "$TRAVIS_CC" != "gcc" ]; then
-    fold_start "arch_travis:install_c_compiler"
+    time_start "Install C Compiler"
     yay -S "$TRAVIS_CC" --noconfirm --needed
-    fold_stop  "arch_travis:install_c_compiler"
+    time_stop  "Install C Compiler"
   fi
 }
 
 read_config
 
-fold_start "arch_travis:setup_env"
 arch_msg "Setting up Arch environment"
 add_repositories
 
@@ -160,7 +161,6 @@ if [ -n "$CC" ]; then
   CC=$TRAVIS_CC
   CXX=$TRAVIS_CXX
 fi
-fold_stop "arch_travis:setup_env"
 
 arch_msg "Running travis build"
 build_scripts
