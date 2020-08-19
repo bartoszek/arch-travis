@@ -14,6 +14,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Proxy time/fold functions
+shopt -s expand_aliases
+alias time_start="travis_time_start"
+alias time_stop="travis_time_finish"
+alias fold_start="travis_fold start"
+alias fold_stop="travis_fold end"
+
+# Add blue color ANSI code
+export ANSI_BLUE='\033[1;34m'
+
+arch_msg() {
+  echo -e "${ANSI_BLUE}$*${ANSI_RESET}"
+}
+
+
 cd /build || exit
 
 if [ -n "$CC" ]; then
@@ -58,37 +73,48 @@ add_repositories() {
     done
 
     # update repos
+    fold_start "Update repositories"
     sudo pacman -Syy
+    fold_stop  "Update repositories"
   fi
 }
 
 # run before_install script defined in .travis.yml
 before_install() {
   if [ ${#CONFIG_BEFORE_INSTALL[@]} -gt 0 ]; then
+    fold_start "arch_travis:before_install"
     for script in "${CONFIG_BEFORE_INSTALL[@]}"; do
-      echo "\$ $script"
+      arch_msg "Evaluate:\n$(sed 's/^/$ /g'<<<"$script")"
       eval "$script" || exit $?
     done
+    fold_stop  "arch_travis:before_install"
   fi
 }
 
 # update reflector to prevent dead mirror causing build to fail.
 update_reflector() {
-    sudo reflector --verbose -l 10 \
-        --sort rate --save /etc/pacman.d/mirrorlist
+  fold_start "arch_travis:update_reflector"
+  sudo reflector --verbose -l 10 --sort rate --save /etc/pacman.d/mirrorlist
+  fold_stop  "arch_travis:update_reflector"
 }
 
 # upgrade system to avoid partial upgrade states
 upgrade_system() {
+  fold_start "arch_travis:upgrade_system"
   sudo pacman -Syu --noconfirm
+  fold_stop  "arch_travis:upgrade_system"
 }
 
 # install packages defined in .travis.yml
 install_packages() {
   if [ ${#CONFIG_PACKAGES[@]} -gt 0 ]; then
+    fold_start "arch_travis:install packages"
     for pkg in "${CONFIG_PACKAGES[@]}"; do
+      time_start "yay: install $pkg"
       yay -S "$pkg" --noconfirm --needed --useask --gpgflags "--keyserver hkp://pool.sks-keyservers.net" --mflags="$(env|grep ^TRAVIS)" || exit $?
+      time_stop "yay: install $pkg"
     done
+    fold_stop "arch_travis:install packages"
   fi
 }
 
@@ -96,30 +122,26 @@ install_packages() {
 build_scripts() {
   if [ ${#CONFIG_BUILD_SCRIPTS[@]} -gt 0 ]; then
     for script in "${CONFIG_BUILD_SCRIPTS[@]}"; do
-      echo "\$ $script"
+      arch_msg "Evaluate:\n$(sed 's/^/$ /g'<<<"$script")"
       eval "$script" || exit $?
     done
   else
-    echo "No build scripts defined"
+    echo -e "${ANSI_RED}No build scripts defined${ANSI_RESET}"
     exit 1
   fi
 }
 
 install_c_compiler() {
   if [ "$TRAVIS_CC" != "gcc" ]; then
+    fold_start "arch_travis:install_c_compiler"
     yay -S "$TRAVIS_CC" --noconfirm --needed
+    fold_stop  "arch_travis:install_c_compiler"
   fi
-}
-
-arch_msg() {
-  lightblue='\033[1;34m'
-  reset='\e[0m'
-  echo -e "${lightblue}$*${reset}"
 }
 
 read_config
 
-echo "travis_fold:start:arch_travis"
+fold_start "arch_travis:setup_env"
 arch_msg "Setting up Arch environment"
 add_repositories
 
@@ -135,8 +157,7 @@ if [ -n "$CC" ]; then
   CC=$TRAVIS_CC
   CXX=$TRAVIS_CXX
 fi
-echo "travis_fold:end:arch_travis"
-echo ""
+fold_stop "arch_travis:setup_env"
 
 arch_msg "Running travis build"
 build_scripts
