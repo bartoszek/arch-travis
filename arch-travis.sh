@@ -66,6 +66,7 @@ mapfile -t envs < <(ruby -e 'ENV.each {|key,_| if not ["PATH","USER","HOME","GOR
 #?? --storage-opt inmemory \
 eval docker run --rm \
     -v "$(pwd):/build" \
+    -v "${TRAVIS_HOME}/.travis:${TRAVIS_HOME}/.travis" \
     "${CONFIG_VOLUMES[@]}" \
     -e "CC=$CC" \
     -e "CXX=$CXX" \

@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Import travis_functions.
+source "${TRAVIS_HOME}/.travis/functions"
+
 # Proxy time/fold functions
 shopt -s expand_aliases
 alias time_start="travis_time_start"
